@@ -70,11 +70,16 @@
             <id>viaversion-repo</id>
             <url>https://repo.viaversion.com</url>
         </repository>
-		
+
         <!-- Mojang's Minecraft Libraries -->
         <repository>
             <id>mojang</id>
             <url>https://libraries.minecraft.net</url>
+        </repository>
+
+        <repository>
+            <id>sonatype-oss</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 
@@ -89,7 +94,6 @@
         </dependency>
 
         <!-- OpenNBT Library -->
-        <!--Version 1.0 is conflicting with Maven Central (2012)-->
         <dependency>
             <groupId>com.github.steveice10</groupId>
             <artifactId>opennbt</artifactId>
@@ -116,12 +120,36 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- ChatColour API -->
+        <!-- Adventure component library -->
         <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-chat</artifactId>
-            <version>1.16-R0.4-SNAPSHOT</version>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.2.0-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-legacy</artifactId>
+            <version>4.1.1</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-gson</artifactId>
+            <version>4.1.1</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Guava magic -->
