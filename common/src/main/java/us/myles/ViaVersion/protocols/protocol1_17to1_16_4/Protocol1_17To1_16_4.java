@@ -1,6 +1,7 @@
 package us.myles.ViaVersion.protocols.protocol1_17to1_16_4;
 
 import org.jetbrains.annotations.Nullable;
+import us.myles.ViaVersion.api.Via;
 import us.myles.ViaVersion.api.data.MappingData;
 import us.myles.ViaVersion.api.data.UserConnection;
 import us.myles.ViaVersion.api.protocol.ClientboundPacketType;
@@ -81,7 +82,7 @@ public class Protocol1_17To1_16_4 extends Protocol<ClientboundPackets1_16_2, Cli
                 handler(wrapper -> {
                     wrapper.passthrough(Type.STRING);
                     wrapper.passthrough(Type.STRING);
-                    wrapper.write(Type.BOOLEAN, false); // Required
+                    wrapper.write(Type.BOOLEAN, Via.getConfig().isForcedUse1_17ResourcePack()); // Required
                 });
             }
         });
@@ -150,6 +151,7 @@ public class Protocol1_17To1_16_4 extends Protocol<ClientboundPackets1_16_2, Cli
                 map(Type.FLOAT); // X
                 map(Type.FLOAT); // Y
                 map(Type.FLOAT); // Z
+                map(Type.FLOAT); // Strength
                 handler(wrapper -> {
                     // Collection length is now a var int
                     wrapper.write(Type.VAR_INT, wrapper.read(Type.INT));

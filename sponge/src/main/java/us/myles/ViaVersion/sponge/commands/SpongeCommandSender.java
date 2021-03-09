@@ -1,10 +1,9 @@
 package us.myles.ViaVersion.sponge.commands;
 
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Identifiable;
+import us.myles.ViaVersion.SpongePlugin;
 import us.myles.ViaVersion.api.command.ViaCommandSender;
 
 import java.util.UUID;
@@ -23,13 +22,8 @@ public class SpongeCommandSender implements ViaCommandSender {
 
     @Override
     public void sendMessage(String msg) {
-        source.sendMessage(
-                TextSerializers.JSON.deserialize(
-                        ComponentSerializer.toString(
-                                TextComponent.fromLegacyText(msg) // Hacky way to fix links
-                        )
-                )
-        );
+        String serialized = SpongePlugin.COMPONENT_SERIALIZER.serialize(SpongePlugin.COMPONENT_SERIALIZER.deserialize(msg));
+        source.sendMessage(TextSerializers.JSON.deserialize(serialized)); // Hacky way to fix links
     }
 
     @Override

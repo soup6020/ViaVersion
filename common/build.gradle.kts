@@ -8,9 +8,7 @@ blossom {
 }
 
 dependencies {
-    api("net.md-5", "bungeecord-chat", Versions.bungeeChat) {
-        exclude("com.google.guava")
-    }
+    api(project(":adventure", "shadow"))
     api("it.unimi.dsi", "fastutil", Versions.fastUtil)
     api("com.github.steveice10", "opennbt", Versions.openNBT)
     api("com.google.code.gson", "gson", Versions.gson)

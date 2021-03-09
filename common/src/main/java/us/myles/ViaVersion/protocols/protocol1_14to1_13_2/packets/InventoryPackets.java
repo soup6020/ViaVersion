@@ -1,14 +1,9 @@
 package us.myles.ViaVersion.protocols.protocol1_14to1_13_2.packets;
 
-import com.github.steveice10.opennbt.tag.builtin.CompoundTag;
-import com.github.steveice10.opennbt.tag.builtin.DoubleTag;
-import com.github.steveice10.opennbt.tag.builtin.ListTag;
-import com.github.steveice10.opennbt.tag.builtin.StringTag;
-import com.github.steveice10.opennbt.tag.builtin.Tag;
+import com.github.steveice10.opennbt.tag.builtin.*;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.md_5.bungee.api.ChatColor;
 import us.myles.ViaVersion.api.PacketWrapper;
 import us.myles.ViaVersion.api.Via;
 import us.myles.ViaVersion.api.minecraft.item.Item;
@@ -55,7 +50,7 @@ public class InventoryPackets {
                 handler(new PacketHandler() {
                     @Override
                     public void handle(PacketWrapper wrapper) throws Exception {
-                        Short windowsId = wrapper.read(Type.UNSIGNED_BYTE);
+                        Short windowId = wrapper.read(Type.UNSIGNED_BYTE);
                         String type = wrapper.read(Type.STRING);
                         JsonElement title = wrapper.read(Type.COMPONENT);
                         COMPONENT_REWRITER.processText(title);
@@ -64,19 +59,15 @@ public class InventoryPackets {
                         if (type.equals("EntityHorse")) {
                             wrapper.setId(0x1F);
                             int entityId = wrapper.read(Type.INT);
-                            wrapper.write(Type.UNSIGNED_BYTE, windowsId);
+                            wrapper.write(Type.UNSIGNED_BYTE, windowId);
                             wrapper.write(Type.VAR_INT, slots.intValue());
                             wrapper.write(Type.INT, entityId);
                         } else {
                             wrapper.setId(0x2E);
-                            wrapper.write(Type.VAR_INT, windowsId.intValue());
+                            wrapper.write(Type.VAR_INT, windowId.intValue());
 
                             int typeId = -1;
                             switch (type) {
-                                case "minecraft:container":
-                                case "minecraft:chest":
-                                    typeId = slots / 9 - 1;
-                                    break;
                                 case "minecraft:crafting_table":
                                     typeId = 11;
                                     break;
@@ -107,6 +98,13 @@ public class InventoryPackets {
                                     break;
                                 case "minecraft:shulker_box":
                                     typeId = 19;
+                                    break;
+                                case "minecraft:container":
+                                case "minecraft:chest":
+                                default:
+                                    if (slots > 0 && slots <= 54) {
+                                        typeId = slots / 9 - 1;
+                                    }
                                     break;
                             }
 
@@ -249,7 +247,7 @@ public class InventoryPackets {
                 display.put(new ListTag(NBT_TAG_NAME + "|Lore", lore.clone().getValue())); // Save old lore
                 for (Tag loreEntry : lore) {
                     if (loreEntry instanceof StringTag) {
-                        String jsonText = ChatRewriter.fromLegacyTextAsString(((StringTag) loreEntry).getValue(), ChatColor.WHITE, true);
+                        String jsonText = ChatRewriter.legacyTextToJsonString(((StringTag) loreEntry).getValue(), true);
                         ((StringTag) loreEntry).setValue(jsonText);
                     }
                 }
@@ -276,7 +274,7 @@ public class InventoryPackets {
                 } else {
                     for (Tag loreEntry : lore) {
                         if (loreEntry instanceof StringTag) {
-                            ((StringTag) loreEntry).setValue(ChatRewriter.jsonTextToLegacy(((StringTag) loreEntry).getValue()));
+                            ((StringTag) loreEntry).setValue(ChatRewriter.jsonToLegacyText(((StringTag) loreEntry).getValue()));
                         }
                     }
                 }
