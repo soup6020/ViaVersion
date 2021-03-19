@@ -30,7 +30,7 @@ public class BannerHandler implements BlockEntityProvider.BlockEntityHandler {
         Tag base = tag.get("Base");
         int color = 0;
         if (base != null) {
-            color = ((Number) tag.get("Base").getValue()).intValue();
+            color = ((NumberTag) tag.get("Base")).asInt();
         }
         // Standing banner
         if (blockId >= BANNER_START && blockId <= BANNER_STOP) {
@@ -61,7 +61,7 @@ public class BannerHandler implements BlockEntityProvider.BlockEntityHandler {
         return blockId;
     }
 
-    private long getLong(Tag tag) {
-        return ((Integer) tag.getValue()).longValue();
+    private long getLong(NumberTag tag) {
+        return tag.asLong();
     }
 }
