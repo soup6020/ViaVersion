@@ -1,3 +1,20 @@
+/*
+ * This file is part of ViaVersion - https://github.com/ViaVersion/ViaVersion
+ * Copyright (C) 2016-2021 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package us.myles.ViaVersion.bungee.handlers;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -9,14 +26,13 @@ import net.md_5.bungee.api.score.Team;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.protocol.packet.PluginMessage;
 import us.myles.ViaVersion.api.PacketWrapper;
-import us.myles.ViaVersion.api.Pair;
 import us.myles.ViaVersion.api.Via;
 import us.myles.ViaVersion.api.data.ExternalJoinGameListener;
 import us.myles.ViaVersion.api.data.StoredObject;
 import us.myles.ViaVersion.api.data.UserConnection;
 import us.myles.ViaVersion.api.protocol.Protocol;
+import us.myles.ViaVersion.api.protocol.ProtocolPathEntry;
 import us.myles.ViaVersion.api.protocol.ProtocolPipeline;
-import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
 import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 import us.myles.ViaVersion.api.type.Type;
 import us.myles.ViaVersion.bungee.service.ProtocolDetectorService;
@@ -69,14 +85,14 @@ public class BungeeServerHandler implements Listener {
             return;
         }
 
-        UserConnection user = Via.getManager().getConnection(e.getPlayer().getUniqueId());
+        UserConnection user = Via.getManager().getConnectionManager().getConnectedClient(e.getPlayer().getUniqueId());
         if (user == null) return;
         if (!user.has(BungeeStorage.class)) {
             user.put(new BungeeStorage(user, e.getPlayer()));
         }
 
         int protocolId = ProtocolDetectorService.getProtocolId(e.getTarget().getName());
-        List<Pair<Integer, Protocol>> protocols = ProtocolRegistry.getProtocolPath(user.getProtocolInfo().getProtocolVersion(), protocolId);
+        List<ProtocolPathEntry> protocols = Via.getManager().getProtocolManager().getProtocolPath(user.getProtocolInfo().getProtocolVersion(), protocolId);
 
         // Check if ViaVersion can support that version
         try {
@@ -91,7 +107,7 @@ public class BungeeServerHandler implements Listener {
     @EventHandler(priority = -120)
     public void onServerConnected(ServerConnectedEvent e) {
         try {
-            checkServerChange(e, Via.getManager().getConnection(e.getPlayer().getUniqueId()));
+            checkServerChange(e, Via.getManager().getConnectionManager().getConnectedClient(e.getPlayer().getUniqueId()));
         } catch (Exception e1) {
             e1.printStackTrace();
         }
@@ -100,7 +116,7 @@ public class BungeeServerHandler implements Listener {
     @EventHandler(priority = -120)
     public void onServerSwitch(ServerSwitchEvent e) {
         // Update entity id
-        UserConnection userConnection = Via.getManager().getConnection(e.getPlayer().getUniqueId());
+        UserConnection userConnection = Via.getManager().getConnectionManager().getConnectedClient(e.getPlayer().getUniqueId());
         if (userConnection == null) return;
         int playerId;
         try {
@@ -159,7 +175,7 @@ public class BungeeServerHandler implements Listener {
                     int previousServerProtocol = info.getServerProtocolVersion();
 
                     // Refresh the pipes
-                    List<Pair<Integer, Protocol>> protocols = ProtocolRegistry.getProtocolPath(info.getProtocolVersion(), protocolId);
+                    List<ProtocolPathEntry> protocols = Via.getManager().getProtocolManager().getProtocolPath(info.getProtocolVersion(), protocolId);
                     ProtocolPipeline pipeline = user.getProtocolInfo().getPipeline();
                     user.clearStoredObjects();
                     pipeline.cleanPipes();
@@ -167,14 +183,14 @@ public class BungeeServerHandler implements Listener {
                         // TODO Check Bungee Supported Protocols? *shrugs*
                         protocolId = info.getProtocolVersion();
                     } else {
-                        for (Pair<Integer, Protocol> prot : protocols) {
-                            pipeline.add(prot.getValue());
+                        for (ProtocolPathEntry prot : protocols) {
+                            pipeline.add(prot.getProtocol());
                         }
                     }
 
                     info.setServerProtocolVersion(protocolId);
                     // Add version-specific base Protocol
-                    pipeline.add(ProtocolRegistry.getBaseProtocol(protocolId));
+                    pipeline.add(Via.getManager().getProtocolManager().getBaseProtocol(protocolId));
 
                     // Workaround 1.13 server change
                     Object relayMessages = getRelayMessages.invoke(e.getPlayer().getPendingConnection());

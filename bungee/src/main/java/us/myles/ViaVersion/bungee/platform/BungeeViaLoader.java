@@ -1,3 +1,20 @@
+/*
+ * This file is part of ViaVersion - https://github.com/ViaVersion/ViaVersion
+ * Copyright (C) 2016-2021 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package us.myles.ViaVersion.bungee.platform;
 
 import net.md_5.bungee.api.ProxyServer;
@@ -6,12 +23,15 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 import us.myles.ViaVersion.BungeePlugin;
 import us.myles.ViaVersion.api.Via;
 import us.myles.ViaVersion.api.platform.ViaPlatformLoader;
-import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
 import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 import us.myles.ViaVersion.bungee.handlers.BungeeServerHandler;
 import us.myles.ViaVersion.bungee.listeners.ElytraPatch;
 import us.myles.ViaVersion.bungee.listeners.UpdateListener;
-import us.myles.ViaVersion.bungee.providers.*;
+import us.myles.ViaVersion.bungee.providers.BungeeBossBarProvider;
+import us.myles.ViaVersion.bungee.providers.BungeeEntityIdProvider;
+import us.myles.ViaVersion.bungee.providers.BungeeMainHandProvider;
+import us.myles.ViaVersion.bungee.providers.BungeeMovementTransmitter;
+import us.myles.ViaVersion.bungee.providers.BungeeVersionProvider;
 import us.myles.ViaVersion.bungee.service.ProtocolDetectorService;
 import us.myles.ViaVersion.protocols.base.VersionProvider;
 import us.myles.ViaVersion.protocols.protocol1_9to1_8.providers.BossBarProvider;

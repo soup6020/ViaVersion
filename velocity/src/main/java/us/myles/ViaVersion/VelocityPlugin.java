@@ -1,3 +1,20 @@
+/*
+ * This file is part of ViaVersion - https://github.com/ViaVersion/ViaVersion
+ * Copyright (C) 2016-2021 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package us.myles.ViaVersion;
 
 import com.google.gson.JsonObject;
@@ -17,7 +34,6 @@ import us.myles.ViaVersion.api.command.ViaCommandSender;
 import us.myles.ViaVersion.api.configuration.ConfigurationProvider;
 import us.myles.ViaVersion.api.data.MappingDataLoader;
 import us.myles.ViaVersion.api.platform.TaskId;
-import us.myles.ViaVersion.api.platform.ViaConnectionManager;
 import us.myles.ViaVersion.api.platform.ViaPlatform;
 import us.myles.ViaVersion.dump.PluginInfo;
 import us.myles.ViaVersion.util.GsonUtil;
@@ -62,7 +78,6 @@ public class VelocityPlugin implements ViaPlatform<Player> {
     private VelocityViaAPI api;
     private java.util.logging.Logger logger;
     private VelocityViaConfig conf;
-    private ViaConnectionManager connectionManager;
 
     @Subscribe
     public void onProxyInit(ProxyInitializeEvent e) {
@@ -72,8 +87,7 @@ public class VelocityPlugin implements ViaPlatform<Player> {
         api = new VelocityViaAPI();
         conf = new VelocityViaConfig(configDir.toFile());
         logger = new LoggerWrapper(loggerslf4j);
-        connectionManager = new ViaConnectionManager();
-        Via.init(ViaManager.builder()
+        Via.init(ViaManagerImpl.builder()
                 .platform(this)
                 .commandHandler(commandHandler)
                 .loader(new VelocityViaLoader())
@@ -86,7 +100,7 @@ public class VelocityPlugin implements ViaPlatform<Player> {
 
     @Subscribe(order = PostOrder.LAST)
     public void onProxyLateInit(ProxyInitializeEvent e) {
-        Via.getManager().init();
+        ((ViaManagerImpl) Via.getManager()).init();
     }
 
     @Override
@@ -222,10 +236,5 @@ public class VelocityPlugin implements ViaPlatform<Player> {
     @Override
     public java.util.logging.Logger getLogger() {
         return logger;
-    }
-
-    @Override
-    public ViaConnectionManager getConnectionManager() {
-        return connectionManager;
     }
 }

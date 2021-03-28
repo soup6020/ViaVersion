@@ -1,7 +1,26 @@
+/*
+ * This file is part of ViaVersion - https://github.com/ViaVersion/ViaVersion
+ * Copyright (C) 2016-2021 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package us.myles.ViaVersion.velocity.platform;
 
 import com.google.gson.JsonObject;
 import io.netty.channel.ChannelInitializer;
+import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import us.myles.ViaVersion.VelocityPlugin;
 import us.myles.ViaVersion.api.Via;
 import us.myles.ViaVersion.api.platform.ViaInjector;
@@ -27,7 +46,7 @@ public class VelocityViaInjector implements ViaInjector {
     private ChannelInitializer getInitializer() throws Exception {
         Object connectionManager = ReflectionUtil.get(VelocityPlugin.PROXY, "cm", Object.class);
         Object channelInitializerHolder = ReflectionUtil.invoke(connectionManager, "getServerChannelInitializer");
-       return (ChannelInitializer) ReflectionUtil.invoke(channelInitializerHolder, "get");
+        return (ChannelInitializer) ReflectionUtil.invoke(channelInitializerHolder, "get");
     }
 
     private ChannelInitializer getBackendInitializer() throws Exception {
@@ -48,7 +67,7 @@ public class VelocityViaInjector implements ViaInjector {
         Object backendInitializerHolder = ReflectionUtil.invoke(connectionManager, "getBackendChannelInitializer");
         ChannelInitializer backendInitializer = getBackendInitializer();
         backendInitializerHolder.getClass().getMethod("set", ChannelInitializer.class)
-            .invoke(backendInitializerHolder, new VelocityChannelInitializer(backendInitializer, true));
+                .invoke(backendInitializerHolder, new VelocityChannelInitializer(backendInitializer, true));
     }
 
     @Override
@@ -62,11 +81,25 @@ public class VelocityViaInjector implements ViaInjector {
         return getLowestSupportedProtocolVersion();
     }
 
+    @Override
+    public IntSortedSet getServerProtocolVersions() throws Exception {
+        int lowestSupportedProtocolVersion = getLowestSupportedProtocolVersion();
+
+        IntSortedSet set = new IntLinkedOpenHashSet();
+        for (com.velocitypowered.api.network.ProtocolVersion version : com.velocitypowered.api.network.ProtocolVersion.SUPPORTED_VERSIONS) {
+            if (version.getProtocol() >= lowestSupportedProtocolVersion) {
+                set.add(version.getProtocol());
+            }
+        }
+        return set;
+    }
+
     public static int getLowestSupportedProtocolVersion() {
         try {
             if (getPlayerInfoForwardingMode != null
                     && ((Enum<?>) getPlayerInfoForwardingMode.invoke(VelocityPlugin.PROXY.getConfiguration()))
                     .name().equals("MODERN")) return ProtocolVersion.v1_13.getOriginalVersion();
+            }
         } catch (IllegalAccessException | InvocationTargetException ignored) {
         }
         return com.velocitypowered.api.network.ProtocolVersion.MINIMUM_VERSION.getProtocol();

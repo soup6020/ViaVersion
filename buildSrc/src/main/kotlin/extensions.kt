@@ -7,6 +7,25 @@ import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.withType
 import java.io.ByteArrayOutputStream
 
+fun Project.configureShadowJarAPI() {
+    apply<ShadowPlugin>()
+    tasks {
+        withType<ShadowJar> {
+            archiveClassifier.set("")
+            configureRelocations()
+            configureExcludes()
+        }
+        getByName("build") {
+            dependsOn(withType<ShadowJar>())
+        }
+        withType<Jar> {
+            if (name == "jar") {
+                archiveClassifier.set("unshaded")
+            }
+        }
+    }
+}
+
 fun Project.configureShadowJar() {
     apply<ShadowPlugin>()
     tasks {
@@ -23,6 +42,9 @@ fun Project.configureShadowJar() {
         withType<Jar> {
             if (name == "jar") {
                 archiveClassifier.set("unshaded")
+            }
+            from(project.parent!!.file("LICENSE")) {
+                into("")
             }
         }
     }
@@ -48,8 +70,6 @@ private fun ShadowJar.configureExcludes() {
     exclude("it/unimi/dsi/fastutil/*/*Char*")
     // Map types
     exclude("it/unimi/dsi/fastutil/*/*Custom*")
-    exclude("it/unimi/dsi/fastutil/*/*Linked*")
-    exclude("it/unimi/dsi/fastutil/*/*Sorted*")
     exclude("it/unimi/dsi/fastutil/*/*Tree*")
     exclude("it/unimi/dsi/fastutil/*/*Heap*")
     exclude("it/unimi/dsi/fastutil/*/*Queue*")

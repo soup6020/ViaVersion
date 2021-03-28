@@ -1,3 +1,20 @@
+/*
+ * This file is part of ViaVersion - https://github.com/ViaVersion/ViaVersion
+ * Copyright (C) 2016-2021 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package us.myles.ViaVersion.bukkit.providers;
 
 import org.bukkit.entity.Player;
@@ -7,7 +24,6 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import us.myles.ViaVersion.api.Via;
 import us.myles.ViaVersion.api.data.UserConnection;
-import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
 import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 import us.myles.ViaVersion.bukkit.tasks.protocol1_12to1_11_1.BukkitInventoryUpdateTask;
 import us.myles.ViaVersion.bukkit.util.NMSUtil;
@@ -54,7 +70,7 @@ public class BukkitInventoryQuickMoveProvider extends InventoryQuickMoveProvider
             // windowId is always 0 for player inventory.
             // This has almost definitely something to do with the offhand slot.
             if (slotId >= 36 && slotId <= 44) {
-                int protocolId = ProtocolRegistry.SERVER_PROTOCOL;
+                int protocolId = Via.getAPI().getServerVersion().lowestSupportedVersion();
                 // this seems to be working just fine.
                 if (protocolId == ProtocolVersion.v1_8.getOriginalVersion()) {
                     return false;
@@ -115,8 +131,13 @@ public class BukkitInventoryQuickMoveProvider extends InventoryQuickMoveProvider
             ReflectionUtil.set(packet, "button", 0); // shift + left mouse click
             ReflectionUtil.set(packet, "d", storage.getActionId());
             ReflectionUtil.set(packet, "item", nmsItem);
+<<<<<<< HEAD
             int protocolId = ProtocolRegistry.SERVER_PROTOCOL;
             if (protocolId == ProtocolVersion.v1_8.getOriginalVersion()) {
+=======
+            int protocolId = Via.getAPI().getServerVersion().lowestSupportedVersion();
+            if (protocolId == ProtocolVersion.v1_8.getVersion()) {
+>>>>>>> upstream/dev
                 ReflectionUtil.set(packet, "shift", 1);
             } else if (protocolId >= ProtocolVersion.v1_9.getOriginalVersion()) { // 1.9+
                 ReflectionUtil.set(packet, "shift", clickTypeEnum);
@@ -154,8 +175,13 @@ public class BukkitInventoryQuickMoveProvider extends InventoryQuickMoveProvider
         }
         try {
             this.windowClickPacketClass = NMSUtil.nms("PacketPlayInWindowClick");
+<<<<<<< HEAD
             int protocolId = ProtocolRegistry.SERVER_PROTOCOL;
             if (protocolId >= ProtocolVersion.v1_9.getOriginalVersion()) {
+=======
+            int protocolId = Via.getAPI().getServerVersion().lowestSupportedVersion();
+            if (protocolId >= ProtocolVersion.v1_9.getVersion()) {
+>>>>>>> upstream/dev
                 Class<?> eclassz = NMSUtil.nms("InventoryClickType");
                 Object[] constants = eclassz.getEnumConstants();
                 this.clickTypeEnum = constants[1]; // QUICK_MOVE
@@ -183,8 +209,13 @@ public class BukkitInventoryQuickMoveProvider extends InventoryQuickMoveProvider
     }
 
     private boolean isSupported() {
+<<<<<<< HEAD
         int protocolId = ProtocolRegistry.SERVER_PROTOCOL;
         if (protocolId >= ProtocolVersion.v1_8.getOriginalVersion() && protocolId <= ProtocolVersion.v1_11_1.getOriginalVersion()) {
+=======
+        int protocolId = Via.getAPI().getServerVersion().lowestSupportedVersion();
+        if (protocolId >= ProtocolVersion.v1_8.getVersion() && protocolId <= ProtocolVersion.v1_11_1.getVersion()) {
+>>>>>>> upstream/dev
             return true; // 1.8-1.11.2
         }
         // this is not needed on 1.12+ servers

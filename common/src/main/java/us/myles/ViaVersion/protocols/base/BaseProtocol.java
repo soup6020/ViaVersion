@@ -1,13 +1,28 @@
+/*
+ * This file is part of ViaVersion - https://github.com/ViaVersion/ViaVersion
+ * Copyright (C) 2016-2021 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package us.myles.ViaVersion.protocols.base;
 
 import us.myles.ViaVersion.api.PacketWrapper;
-import us.myles.ViaVersion.api.Pair;
 import us.myles.ViaVersion.api.Via;
 import us.myles.ViaVersion.api.data.UserConnection;
 import us.myles.ViaVersion.api.platform.providers.ViaProviders;
-import us.myles.ViaVersion.api.protocol.Protocol;
+import us.myles.ViaVersion.api.protocol.ProtocolPathEntry;
 import us.myles.ViaVersion.api.protocol.ProtocolPipeline;
-import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
 import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 import us.myles.ViaVersion.api.protocol.SimpleProtocol;
 import us.myles.ViaVersion.api.remapper.PacketRemapper;
@@ -44,19 +59,19 @@ public class BaseProtocol extends SimpleProtocol {
                     // Choose the pipe
                     int serverProtocol = Via.getManager().getProviders().get(VersionProvider.class).getServerProtocol(wrapper.user());
                     info.setServerProtocolVersion(serverProtocol);
-                    List<Pair<Integer, Protocol>> protocols = null;
+                    List<ProtocolPathEntry> protocols = null;
 
                     // Only allow newer clients or (1.9.2 on 1.9.4 server if the server supports it)
                     if (info.getProtocolVersion() >= serverProtocol || Via.getPlatform().isOldClientsAllowed()) {
-                        protocols = ProtocolRegistry.getProtocolPath(info.getProtocolVersion(), serverProtocol);
+                        protocols = Via.getManager().getProtocolManager().getProtocolPath(info.getProtocolVersion(), serverProtocol);
                     }
 
                     ProtocolPipeline pipeline = wrapper.user().getProtocolInfo().getPipeline();
                     if (protocols != null) {
-                        for (Pair<Integer, Protocol> prot : protocols) {
-                            pipeline.add(prot.getValue());
+                        for (ProtocolPathEntry prot : protocols) {
+                            pipeline.add(prot.getProtocol());
                             // Ensure mapping data has already been loaded
-                            ProtocolRegistry.completeMappingDataLoading(prot.getValue().getClass());
+                            Via.getManager().getProtocolManager().completeMappingDataLoading(prot.getProtocol().getClass());
                         }
 
                         // Set the original snapshot version if present
@@ -65,7 +80,7 @@ public class BaseProtocol extends SimpleProtocol {
                     }
 
                     // Add Base Protocol
-                    pipeline.add(ProtocolRegistry.getBaseProtocol(serverProtocol));
+                    pipeline.add(Via.getManager().getProtocolManager().getBaseProtocol(serverProtocol));
 
                     // Change state
                     if (state == 1) {
@@ -86,7 +101,7 @@ public class BaseProtocol extends SimpleProtocol {
 
     @Override
     protected void register(ViaProviders providers) {
-        providers.register(VersionProvider.class, new VersionProvider());
+        providers.register(VersionProvider.class, new BaseVersionProvider());
     }
 
     @Override

@@ -1,3 +1,20 @@
+/*
+ * This file is part of ViaVersion - https://github.com/ViaVersion/ViaVersion
+ * Copyright (C) 2016-2021 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package us.myles.ViaVersion;
 
 import com.google.gson.JsonObject;
@@ -12,7 +29,6 @@ import us.myles.ViaVersion.api.command.ViaCommandSender;
 import us.myles.ViaVersion.api.configuration.ConfigurationProvider;
 import us.myles.ViaVersion.api.data.MappingDataLoader;
 import us.myles.ViaVersion.api.platform.TaskId;
-import us.myles.ViaVersion.api.platform.ViaConnectionManager;
 import us.myles.ViaVersion.api.platform.ViaPlatform;
 import us.myles.ViaVersion.bungee.commands.BungeeCommand;
 import us.myles.ViaVersion.bungee.commands.BungeeCommandHandler;
@@ -34,14 +50,13 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class BungeePlugin extends Plugin implements ViaPlatform<ProxiedPlayer>, Listener {
-    private final ViaConnectionManager connectionManager = new ViaConnectionManager();
     private BungeeViaAPI api;
     private BungeeViaConfig config;
 
     @Override
     public void onLoad() {
         try {
-            ProtocolConstants.class.getField("MINECRAFT_1_16_3");
+            ProtocolConstants.class.getField("MINECRAFT_1_16_4");
         } catch (NoSuchFieldException e) {
             getLogger().warning("      / \\");
             getLogger().warning("     /   \\");
@@ -58,7 +73,7 @@ public class BungeePlugin extends Plugin implements ViaPlatform<ProxiedPlayer>, 
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new BungeeCommand(commandHandler));
 
         // Init platform
-        Via.init(ViaManager.builder()
+        Via.init(ViaManagerImpl.builder()
                 .platform(this)
                 .injector(new BungeeViaInjector())
                 .loader(new BungeeViaLoader(this))
@@ -73,7 +88,7 @@ public class BungeePlugin extends Plugin implements ViaPlatform<ProxiedPlayer>, 
         }
 
         // Inject
-        Via.getManager().init();
+        ((ViaManagerImpl) Via.getManager()).init();
     }
 
     @Override
@@ -198,10 +213,5 @@ public class BungeePlugin extends Plugin implements ViaPlatform<ProxiedPlayer>, 
     @Override
     public boolean isOldClientsAllowed() {
         return true;
-    }
-
-    @Override
-    public ViaConnectionManager getConnectionManager() {
-        return connectionManager;
     }
 }

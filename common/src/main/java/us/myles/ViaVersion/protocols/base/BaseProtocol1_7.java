@@ -1,3 +1,20 @@
+/*
+ * This file is part of ViaVersion - https://github.com/ViaVersion/ViaVersion
+ * Copyright (C) 2016-2021 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package us.myles.ViaVersion.protocols.base;
 
 import com.google.common.base.Joiner;
@@ -6,11 +23,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import io.netty.channel.ChannelFuture;
 import us.myles.ViaVersion.api.PacketWrapper;
-import us.myles.ViaVersion.api.Pair;
 import us.myles.ViaVersion.api.Via;
-import us.myles.ViaVersion.api.protocol.Protocol;
-import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
+import us.myles.ViaVersion.api.protocol.ProtocolManagerImpl;
+import us.myles.ViaVersion.api.protocol.ProtocolPathEntry;
 import us.myles.ViaVersion.api.protocol.ProtocolVersion;
+import us.myles.ViaVersion.api.protocol.ServerProtocolVersionSingleton;
 import us.myles.ViaVersion.api.protocol.SimpleProtocol;
 import us.myles.ViaVersion.api.remapper.PacketHandler;
 import us.myles.ViaVersion.api.remapper.PacketRemapper;
@@ -64,6 +81,7 @@ public class BaseProtocol1_7 extends SimpleProtocol {
                                 version.add("supportedVersions", GsonUtil.getGson().toJsonTree(Via.getAPI().getSupportedVersions()));
                             }
 
+<<<<<<< HEAD
                             if (ProtocolRegistry.SERVER_PROTOCOL == -1) { // Set the Server protocol if the detection on startup failed
                                 ProtocolRegistry.SERVER_PROTOCOL = ProtocolVersion.getProtocol(protocolVersion).getOriginalVersion();
                             }
@@ -75,16 +93,14 @@ public class BaseProtocol1_7 extends SimpleProtocol {
                                 return;
                             }
 
-                            int protocol = versionProvider.getServerProtocol(wrapper.user());
-                            List<Pair<Integer, Protocol>> protocols = null;
-
-                            // Only allow newer clients or (1.9.2 on 1.9.4 server if the server supports it)
-                            if (info.getProtocolVersion() >= protocol || Via.getPlatform().isOldClientsAllowed()) {
-                                protocols = ProtocolRegistry.getProtocolPath(info.getProtocolVersion(), protocol);
+                            int closestServerProtocol = versionProvider.getServerProtocol(wrapper.user());
+                            List<ProtocolPathEntry> protocols = null;
+                            if (info.getProtocolVersion() >= closestServerProtocol || Via.getPlatform().isOldClientsAllowed()) {
+                                protocols = Via.getManager().getProtocolManager().getProtocolPath(info.getProtocolVersion(), closestServerProtocol);
                             }
 
                             if (protocols != null) {
-                                if (protocolVersion == protocol || protocolVersion == 0) { // Fix ServerListPlus
+                                if (protocolVersion == closestServerProtocol || protocolVersion == 0) { // Fix ServerListPlus
                                     ProtocolVersion prot = ProtocolVersion.getProtocol(info.getProtocolVersion());
                                     version.addProperty("protocol", prot.getOriginalVersion());
                                 }
@@ -127,9 +143,9 @@ public class BaseProtocol1_7 extends SimpleProtocol {
                         String username = wrapper.passthrough(Type.STRING);
                         info.setUsername(username);
                         // Add to ported clients
-                        Via.getManager().handleLoginSuccess(wrapper.user());
+                        Via.getManager().getConnectionManager().onLoginSuccess(wrapper.user());
 
-                        if (info.getPipeline().pipes().stream().allMatch(ProtocolRegistry::isBaseProtocol)) { // Only base protocol
+                        if (info.getPipeline().pipes().stream().allMatch(Via.getManager().getProtocolManager()::isBaseProtocol)) { // Only base protocol
                             wrapper.user().setActive(false);
                         }
 
